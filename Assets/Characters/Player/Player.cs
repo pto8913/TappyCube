@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Util;
 
@@ -11,24 +9,59 @@ public interface IPlayer
 public class Player : MonoBehaviour, IPlayer
 {
     private GameObject go_Barrier;
+    private GameObject go_Jet;
+    private GameObject lastHitDeath;
+    private GameObject lastHitScore;
 
     [SerializeField] private LayerMask deathLayer;
     [SerializeField] private LayerMask itemLayer;
+    [SerializeField] private AudioSource SE_Barrier_Broke;
 
+    private void Update()
+    {
+        if (!enabled) return;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+        }
+    }
+    public GameObject GetParent()
+    {
+        return gameObject.transform.parent.gameObject;
+    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!enabled) return;
 
         if (UtilImpl.IsSameLayer(collision.gameObject.layer, deathLayer))
         {
+            if (lastHitDeath == collision.gameObject) return;
+            lastHitDeath = collision.gameObject;
+
+            if (go_Jet != null)
+            {
+#if UNITY_EDITOR
+                Debug.Log("has go_Jet");
+#endif
+                return;
+            }
+
             if (go_Barrier != null)
             {
+#if UNITY_EDITOR
+                Debug.Log("has go_Barrier");
+#endif
+                SE_Barrier_Broke.Play();
                 Destroy(go_Barrier);
+                return;
             }
-            else
-            {
-                GameManager.Instance.SetGameState(GameState.GameOver);
-            }
+
+            GameManager.Instance.SetGameState(GameState.GameOver);
         }
     }
 
@@ -37,14 +70,23 @@ public class Player : MonoBehaviour, IPlayer
         if (UtilImpl.IsSameLayer(collision.gameObject.layer, itemLayer))
         {
             IItem item = collision.gameObject.GetComponent<IItem>();
-
+            
             bool success = item.Pickup(gameObject);
             if (success)
             {
-                if (item.GetItemType() == ItemType.Barrier)
+                switch (item.GetItemType())
                 {
-                    item.Attach(gameObject);
-                    go_Barrier = collision.gameObject;
+                    case ItemType.Barrier:
+                        go_Barrier = item.Attach(gameObject);
+                        break;
+                    case ItemType.Jet:
+                        go_Jet = item.Attach(gameObject);
+#if UNITY_EDITOR
+                        Debug.Log("Set go_Jet");
+#endif
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -53,6 +95,9 @@ public class Player : MonoBehaviour, IPlayer
     {
         if (UtilImpl.IsSameLayer(collision.gameObject.layer, deathLayer))
         {
+            if (lastHitScore == collision.gameObject) return;
+            lastHitScore = collision.gameObject;
+
             GameManager.Instance.AddScore(1);
         }
     }
@@ -63,6 +108,12 @@ public class Player : MonoBehaviour, IPlayer
         {
             case ItemType.Barrier:
                 if (go_Barrier != null)
+                {
+                    return true;
+                }
+                break;
+            case ItemType.Jet:
+                if (go_Jet != null)
                 {
                     return true;
                 }

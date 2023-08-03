@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public enum ItemType
+public enum ItemType : uint
 {
-    Jet,
-    Barrier,
+    Jet = 0,
+    Barrier = 1,
 }
 
 public class ItemManager : MonoBehaviour

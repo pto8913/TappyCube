@@ -1,20 +1,16 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.UIElements;
 using UnityEngine;
 
 public interface IItem
 {
     public bool Pickup(GameObject go);
-    public void Attach(GameObject player);
+    public GameObject Attach(GameObject player);
     public ItemType GetItemType();
 }
 
 public class Item : MonoBehaviour, IItem
 {
-    [SerializeField] public string playerTag = "Player";
-    [SerializeField] public ItemType type;
+    [SerializeField] private string playerTag = "Player";
+    [SerializeField] private ItemType type;
 
     public void Start()
     {
@@ -50,11 +46,13 @@ public class Item : MonoBehaviour, IItem
         }
         return false;
     }
-    
-    public void Attach(GameObject player)
-    {
-        if (GameManager.Instance.GetGameState() != GameState.Progress) return;
 
+    public virtual GameObject Attach(GameObject player)
+    {
+        if (GameManager.Instance.GetGameState() != GameState.Progress)
+        {
+            return null;
+        }
 #if UNITY_EDITOR
         Debug.Log("Attach");
 #endif
@@ -66,6 +64,8 @@ public class Item : MonoBehaviour, IItem
         Destroy(gameObject.GetComponent<ItemMovement>());
         Destroy(gameObject.GetComponent<Collider2D>());
         Destroy(gameObject.GetComponent<Rigidbody2D>());
+
+        return gameObject;
     }
 
     public ItemType GetItemType()

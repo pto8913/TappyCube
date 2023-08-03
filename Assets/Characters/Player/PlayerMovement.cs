@@ -7,6 +7,7 @@ public class PlayerInputActions : MonoBehaviour
     public float jumpPower = 16f;
 
     [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private AudioSource SE_Jump;
 
     // Start is called before the first frame update
     void Start()
@@ -47,9 +48,12 @@ public class PlayerInputActions : MonoBehaviour
     {
         if (!enabled) return;
 
-        if (Input.GetButtonDown("Jump"))// && IsGrounded())
+        if (Input.GetButtonDown("Jump"))
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpPower);
+            /* player will be roll. */
+            rb.AddForceAtPosition(new Vector2(5f, 0f), new Vector2(transform.position.x, transform.position.y + 1f));
+            SE_Jump.Play();
         }
         if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
         {

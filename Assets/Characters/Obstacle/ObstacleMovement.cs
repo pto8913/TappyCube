@@ -1,28 +1,39 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public enum OutOfArea
+
+
+public interface IObstacleMovement
 {
-    Respawn,
-    Destroy,
+    public void SetIndex(int index);
+    public int GetIndex();
 }
 
-public class ObstacleMovement : MonoBehaviour
+public class ObstacleMovement : MonoBehaviour, IObstacleMovement
 {
     public float speed = 1f;
-    public Vector3 restartPos = new Vector3(9, 0, 0);
+    [SerializeField] private UnityEngine.Object trigger;
 
-    [SerializeReference] private UnityEngine.Object trigger;
-    [SerializeReference] private OutOfArea outOfAreaProcess = OutOfArea.Respawn;
+    private int thisIndex = -1;
+
+    public GameObject GetParent()
+    {
+        return gameObject.transform.parent.gameObject;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         GameManager.Instance.onGameStateChanged.AddListener(GameStateChanged);
         GameStateChanged(GameManager.Instance.GetGameState());
+    }
+
+    public void SetIndex(int index)
+    {
+        thisIndex = index;
+    }
+    public int GetIndex()
+    {
+        return thisIndex;
     }
 
     void GameStateChanged(GameState state)
@@ -46,7 +57,9 @@ public class ObstacleMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.left * Time.deltaTime * speed);
+        if (!enabled) return;
+
+        transform.Translate(Vector3.left * Time.deltaTime * speed * GameManager.Instance.GetGlobalTimeDilation());
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -54,19 +67,10 @@ public class ObstacleMovement : MonoBehaviour
 #if UNITY_EDITOR
         //Debug.Log(collision.gameObject.name);
 #endif
-        switch (outOfAreaProcess)
+        if (collision.gameObject.Equals(trigger))
         {
-            case OutOfArea.Respawn:
-                if (collision.gameObject.Equals(trigger))
-                {
-                    transform.position = restartPos;
-                }
-                break; 
-            case OutOfArea.Destroy:
-                Destroy(gameObject);
-                break;
-            default:
-                break;
+            IObstacleSpikeContainer parent = GetParent().GetComponent<IObstacleSpikeContainer>();
+            parent.InvokeOutOfContainer(thisIndex);
         }
     }
 }

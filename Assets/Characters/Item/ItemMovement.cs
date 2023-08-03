@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemMovement : MonoBehaviour
@@ -42,7 +40,7 @@ public class ItemMovement : MonoBehaviour
     {
         if (!enabled) return;
 
-        transform.Translate(Vector3.left * Time.deltaTime * speed + Vector3.up * (float)Math.Sin(Time.deltaTime) * scalerUpDown);
+        transform.Translate(Vector3.left * Time.deltaTime * speed * GameManager.Instance.GetGlobalTimeDilation() + Vector3.up * (float)Math.Sin(Time.deltaTime) * scalerUpDown);
 
         if (transform.position == OutOfAreaPos)
         {
