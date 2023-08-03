@@ -41,7 +41,9 @@ public class GameManager : MonoBehaviour
 
     public void SetGameState(GameState state)
     {
+#if UNITY_EDITOR
         Debug.Log(state.ToString());
+#endif
         currentGameState = state;
         onGameStateChanged.Invoke(currentGameState);
 
