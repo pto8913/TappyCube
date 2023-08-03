@@ -27,7 +27,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioSource SE_GameOver;
 
     private int score = 0;
-    private int lowQuarityStart = 0;
 
     private void Awake()
     {
@@ -55,16 +54,6 @@ public class GameManager : MonoBehaviour
             case GameState.GameOver:
                 BGM.Stop();
                 SE_GameOver.Play();
-                /* For less skillful players */
-                if (score < 10)
-                {
-                    ++lowQuarityStart;
-                    if (lowQuarityStart >= 3)
-                    {
-                        spawnItemPerObject /= 2;
-                        lowQuarityStart = 0;
-                    }
-                }
                 break;
             default:
                 break;

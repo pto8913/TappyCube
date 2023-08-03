@@ -1444,7 +1444,7 @@ MonoBehaviour:
   onGameStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  spawnItemPerObject: 4
+  spawnItemPerObject: 3
   BGM: {fileID: 997604764}
   SE_GameOver: {fileID: 1489354826}
 --- !u!114 &520494604
